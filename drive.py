@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 import shutil
 
+import cv2
 import numpy as np
 import socketio
 import eventlet
@@ -34,8 +35,8 @@ def telemetry(sid, data):
         # The current image from the center camera of the car
         imgString = data["image"]
         image = Image.open(BytesIO(base64.b64decode(imgString)))
-        image_array = np.asarray(image)
-        steering_angle = float(model.predict(image_array[None, 40:-20, :, :], batch_size=1))
+        image_array = cv2.resize(np.asarray(image), None, fx=0.5, fy=0.5)
+        steering_angle = float(model.predict(image_array[None, 20:-10, :, :], batch_size=1))
         min_speed = 8
         max_speed = 10
         if float(speed) < min_speed:

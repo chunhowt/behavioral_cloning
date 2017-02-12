@@ -59,6 +59,13 @@ def ReadSamples(directory, shift=False):
       # Skip header line
       if line[0] == 'center':
         continue
+
+      # Skip those with steering angle 0, which is most likely noise during
+      # data collection since the steering is done using keystroke and not
+      # continuous.
+      if float(line[3]) == 0:
+        continue
+
       center_image = line[0].split('/')[-1]
       results.append(Sample(
         os.path.join(directory, 'IMG', center_image),
@@ -89,8 +96,8 @@ def ReadSamples(directory, shift=False):
 
 samples = []
 samples.extend(ReadSamples('data', shift=True))
-samples.extend(ReadSamples('specific_data', shift=True))
-samples.extend(ReadSamples('curve_data', shift=True))
+#samples.extend(ReadSamples('specific_data', shift=True))
+#samples.extend(ReadSamples('curve_data', shift=True))
 
 print('Total # samples: ', len(samples))
 
@@ -113,20 +120,20 @@ def generator(samples, batch_size=32):
       angles = []
       for batch_sample in batch_samples:
         if not batch_sample.flip_:
-          images.append(cv2.imread(batch_sample.image_))
+          images.append(cv2.resize(cv2.imread(batch_sample.image_), None, fx=0.5, fy=0.5))
           angles.append(batch_sample.steering_)
         else:
-          images.append(np.fliplr(cv2.imread(batch_sample.image_)))
+          images.append(cv2.resize(np.fliplr(cv2.imread(batch_sample.image_)), None, fx=0.5, fy=0.5))
           angles.append(-batch_sample.steering_)
       # trim image to only see section with road.
-      X_train = np.array(images)[:, 40:-20, :, :]
+      X_train = np.array(images)[:, 20:-10, :, :]
       y_train = np.array(angles)
       yield sklearn.utils.shuffle(X_train, y_train)
 
 train_generator = generator(train_samples, batch_size=32)
 validation_generator = generator(validation_samples, batch_size=32)
 
-ch, row, col = 3, 100, 320
+ch, row, col = 3, 50, 160
 
 model = Sequential()
 
@@ -134,17 +141,14 @@ model = Sequential()
 model.add(Lambda(lambda x: (x - 127.5) / 127.5, input_shape=(row, col, ch)))
 
 # Model based on LeNet architecture with some modification.
-model.add(Convolution2D(nb_filter=10, nb_row=5, nb_col=5, subsample=(1, 1)))
+model.add(Convolution2D(nb_filter=10, nb_row=3, nb_col=3, subsample=(1, 1)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 model.add(Dropout(0.5))
-model.add(Convolution2D(nb_filter=24, nb_row=5, nb_col=5, subsample=(1, 1)))
+model.add(Convolution2D(nb_filter=24, nb_row=3, nb_col=3, subsample=(1, 1)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 model.add(Dropout(0.5))
-model.add(Convolution2D(nb_filter=40, nb_row=3, nb_col=3, subsample=(1, 1)))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 model.add(Flatten())
 model.add(Dense(120))
 model.add(Activation('relu'))
