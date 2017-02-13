@@ -137,14 +137,14 @@ def generator(samples, batch_size=32):
           images.append(cv2.resize(np.fliplr(cv2.imread(batch_sample.image_)), None, fx=0.5, fy=0.5))
           angles.append(-batch_sample.steering_)
       # trim image to only see section with road.
-      X_train = np.array(images)[:, 25:-10, :, :]
+      X_train = np.array(images)[:, 30:-10, :, :]
       y_train = np.array(angles)
       yield sklearn.utils.shuffle(X_train, y_train)
 
 train_generator = generator(train_samples, batch_size=32)
 validation_generator = generator(validation_samples, batch_size=32)
 
-ch, row, col = 3, 45, 160
+ch, row, col = 3, 40, 160
 
 model = Sequential()
 
