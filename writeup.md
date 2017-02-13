@@ -133,12 +133,15 @@ bottom 10 pixels. I did this so that my input image is smaller allowing training
 removing useless information such as sky and ground since the camera on the car is fixed.
 
 Original image:
+
 ![Original image][image1]
 
 Downsample image:
+
 ![Downsample image][image5]
 
 Cropped image:
+
 ![Cropped image][image2]
 
 I finally randomly shuffled the data set and put 20% of the data into a validation set. 
