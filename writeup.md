@@ -6,6 +6,7 @@
 [image2]: ./examples/cropped.png "Cropped"
 [image3]: ./examples/recovery_curve.jpg "Recovery curve 1"
 [image4]: ./examples/recovery_curve2.jpg "Recovery curve 2"
+[image5]: ./examples/downsample.png "Downsample"
 
 ## Rubric Points
 ###Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
@@ -129,9 +130,15 @@ I manually collect more recovery data targeting those two curves. Example images
 After the collection and data augmentation process, I had 25806 number of data points.
 I then preprocessed this data by downsampling by 2 and then cropping away the top 30 pixels and
 bottom 10 pixels. I did this so that my input image is smaller allowing training to be faster, and then
-removing useless information such as sky and ground since the camera on the car is fixed. Example images:
+removing useless information such as sky and ground since the camera on the car is fixed.
 
+Original image:
 ![Original image][image1]
+
+Downsample image:
+![Downsample image][image5]
+
+Cropped image:
 ![Cropped image][image2]
 
 I finally randomly shuffled the data set and put 20% of the data into a validation set. 
