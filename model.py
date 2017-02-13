@@ -63,53 +63,53 @@ def ReadSamples(directory, shift=False):
       # Skip those with steering angle 0, which is most likely noise during
       # data collection since the steering is done using keystroke and not
       # continuous.
-      if float(line[3]) == 0:
+      steering = float(line[3])
+      if steering == 0:
         continue
 
       center_image = line[0].split('/')[-1]
       results.append(Sample(
-        os.path.join(directory, 'IMG', center_image),
-        float(line[3]),
-        flip=False,
+          os.path.join(directory, 'IMG', center_image),
+          steering,
+          flip=False,
       ))
-      # Generate another mirror image by flipping the image
-      # and steering angle so that the generator can sample from
-      # both images appropriately.
+        # Generate another mirror image by flipping the image
+        # and steering angle so that the generator can sample from
+        # both images appropriately.
       results.append(Sample(
-        os.path.join(directory, 'IMG', center_image),
-        float(line[3]),
-        flip=True
+          os.path.join(directory, 'IMG', center_image),
+          steering,
+          flip=True
       ))
       if shift:
-        # Use the left and right image.
+        # Use the left / right image and their flipped version.
         results.append(Sample(
-          os.path.join(directory, 'IMG', line[1].split('/')[-1]),
-          float(line[3]) + args.steering_adjustment,
-          flip=False
+            os.path.join(directory, 'IMG', line[1].split('/')[-1]),
+            steering + args.steering_adjustment,
+            flip=False
         ))
         results.append(Sample(
-          os.path.join(directory, 'IMG', line[2].split('/')[-1]),
-          float(line[3]) - args.steering_adjustment,
-          flip=False
-        ))
-        # Flip left and right image.
-        results.append(Sample(
-          os.path.join(directory, 'IMG', line[1].split('/')[-1]),
-          float(line[3]) + args.steering_adjustment,
-          flip=True
+            os.path.join(directory, 'IMG', line[1].split('/')[-1]),
+            steering + args.steering_adjustment,
+            flip=True
         ))
         results.append(Sample(
-          os.path.join(directory, 'IMG', line[2].split('/')[-1]),
-          float(line[3]) - args.steering_adjustment,
-          flip=True
+            os.path.join(directory, 'IMG', line[2].split('/')[-1]),
+            steering - args.steering_adjustment,
+            flip=False
+        ))
+        results.append(Sample(
+            os.path.join(directory, 'IMG', line[2].split('/')[-1]),
+            steering - args.steering_adjustment,
+            flip=True
         ))
   return results
 
 samples = []
 samples.extend(ReadSamples('data', shift=True))
-#samples.extend(ReadSamples('specific_data', shift=True))
-#samples.extend(ReadSamples('curve_data', shift=True))
-
+samples.extend(ReadSamples('more_data', shift=False))
+samples.extend(ReadSamples('more_cheat', shift=False))
+samples.extend(ReadSamples('next_cheat', shift=False))
 print('Total # samples: ', len(samples))
 
 train_samples, validation_samples = train_test_split(samples, test_size=args.validation_size)
@@ -164,6 +164,8 @@ model.add(Flatten())
 model.add(Dense(256))
 model.add(Activation('relu'))
 model.add(Dense(64))
+model.add(Activation('relu'))
+model.add(Dense(16))
 model.add(Activation('relu'))
 model.add(Dense(1))
 
