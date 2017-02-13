@@ -106,9 +106,13 @@ def ReadSamples(directory, shift=False):
   return results
 
 samples = []
+# This is Udacity provided data.
 samples.extend(ReadSamples('data', shift=True))
+# This is a directory with a bunch of recovery data.
 samples.extend(ReadSamples('more_data', shift=False))
+# This is a directory with a bunch of recovery data for the first curve after the bridge.
 samples.extend(ReadSamples('more_cheat', shift=False))
+# This is a directory with a bunch of recovery data for the second curve after the bridge.
 samples.extend(ReadSamples('next_cheat', shift=False))
 print('Total # samples: ', len(samples))
 
