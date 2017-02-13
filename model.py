@@ -14,12 +14,6 @@ from keras.layers.pooling import MaxPooling2D
 import sklearn
 from sklearn.model_selection import train_test_split
 
-class Sample(object):
-  def __init__(self, image, steering, flip):
-    self.image_ = image
-    self.steering_ = steering
-    self.flip_ = flip
-
 parser = argparse.ArgumentParser(description='Model training')
 parser.add_argument(
     'model',
@@ -49,9 +43,26 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
+
+class Sample(object):
+  """A class to represent a training data sample.
+  """
+
+  def __init__(self, image, steering, flip):
+    self.image_ = image
+    self.steering_ = steering
+    # If true, flip the image and steering angle.
+    self.flip_ = flip
+
+
 # First, read the sample images for training.
-samples = []
 def ReadSamples(directory, shift=False):
+  """Reads and returns the data from the given directory as Sample objects.
+
+  Args:
+    directory: Directory storing training data.
+    shift: If true, use the images from left and right camera as training data.
+  """
   results = []
   with open(os.path.join(directory, 'driving_log.csv')) as csvfile:
     reader = csv.reader(csvfile)
@@ -73,14 +84,15 @@ def ReadSamples(directory, shift=False):
           steering,
           flip=False,
       ))
-        # Generate another mirror image by flipping the image
-        # and steering angle so that the generator can sample from
-        # both images appropriately.
+      # Generate another mirror image by flipping the image
+      # and steering angle so that the generator can sample from
+      # both images appropriately.
       results.append(Sample(
           os.path.join(directory, 'IMG', center_image),
           steering,
           flip=True
       ))
+
       if shift:
         # Use the left / right image and their flipped version.
         results.append(Sample(
