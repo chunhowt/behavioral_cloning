@@ -36,7 +36,7 @@ def telemetry(sid, data):
         imgString = data["image"]
         image = Image.open(BytesIO(base64.b64decode(imgString)))
         image_array = cv2.resize(np.asarray(image), None, fx=0.5, fy=0.5)
-        steering_angle = float(model.predict(image_array[None, 20:-10, :, :], batch_size=1))
+        steering_angle = float(model.predict(image_array[None, 25:-10, :, :], batch_size=1))
         min_speed = 8
         max_speed = 10
         if float(speed) < min_speed:

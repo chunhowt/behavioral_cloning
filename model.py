@@ -92,6 +92,17 @@ def ReadSamples(directory, shift=False):
           float(line[3]) - args.steering_adjustment,
           flip=False
         ))
+        # Flip left and right image.
+        results.append(Sample(
+          os.path.join(directory, 'IMG', line[1].split('/')[-1]),
+          float(line[3]) + args.steering_adjustment,
+          flip=True
+        ))
+        results.append(Sample(
+          os.path.join(directory, 'IMG', line[2].split('/')[-1]),
+          float(line[3]) - args.steering_adjustment,
+          flip=True
+        ))
   return results
 
 samples = []
@@ -126,14 +137,14 @@ def generator(samples, batch_size=32):
           images.append(cv2.resize(np.fliplr(cv2.imread(batch_sample.image_)), None, fx=0.5, fy=0.5))
           angles.append(-batch_sample.steering_)
       # trim image to only see section with road.
-      X_train = np.array(images)[:, 20:-10, :, :]
+      X_train = np.array(images)[:, 25:-10, :, :]
       y_train = np.array(angles)
       yield sklearn.utils.shuffle(X_train, y_train)
 
 train_generator = generator(train_samples, batch_size=32)
 validation_generator = generator(validation_samples, batch_size=32)
 
-ch, row, col = 3, 50, 160
+ch, row, col = 3, 45, 160
 
 model = Sequential()
 
@@ -150,11 +161,9 @@ model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 model.add(Dropout(0.5))
 model.add(Flatten())
-model.add(Dense(120))
+model.add(Dense(256))
 model.add(Activation('relu'))
-model.add(Dense(84))
-model.add(Activation('relu'))
-model.add(Dense(10))
+model.add(Dense(64))
 model.add(Activation('relu'))
 model.add(Dense(1))
 
